@@ -14,11 +14,10 @@ const images = import.meta.glob('./img/*.{jpg,jpeg,png,webp,svg}', { eager: true
 
 
 
-const GROUP_PHOTOS = Object.values(images).map((img, index) => ({
-  src: img.default,
-  id: index,
-}));
 
+const GROUP_PHOTOS = Object.values(images)
+  .map((img, index) => ({ src: img.default, id: index }))
+  .sort(() => Math.random() - 0.5); // <-- Mélange aléatoire ici
 const PALETTE = ["#FF6B57", "#FFC145", "#3ABE8E", "#4E8FE0", "#B168E8"];
 
 // petites inclinaisons variées pour un effet "collé à la main"
