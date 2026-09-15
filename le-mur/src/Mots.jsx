@@ -260,7 +260,7 @@ export default function LeMurDesMots() {
 
 <div style={{ textAlign: 'center', margin: '28px 0 0' }}>
   <button onClick={() => navigate('/')} className="home-button">
-    Retour au Mur
+    Retour au Mur 
   </button>
 </div>
     </div>
