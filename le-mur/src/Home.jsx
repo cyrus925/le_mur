@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
+import { supabase } from './lib/supabaseClient';
 
 /* ============================================================
    LE MUR — config à personnaliser
@@ -10,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 ============================================================ */
 // Remplace ton tableau GROUP_PHOTOS par ceci :
 const images = import.meta.glob('./img/*.{jpg,jpeg,png,webp,svg}', { eager: true });
+
+
 
 const GROUP_PHOTOS = Object.values(images).map((img, index) => ({
   src: img.default,
@@ -59,7 +62,7 @@ function Note({ entry, index }) {
   const rotations = [-3, 2, -1.5, 3, -2.5, 1];
   const rot = rotations[index % rotations.length];
   const color = PALETTE[index % PALETTE.length];
-  const date = new Date(entry.timestamp).toLocaleString("fr-FR", {
+  const date = new Date(entry.created_at).toLocaleString("fr-FR", { 
     day: "2-digit",
     month: "2-digit",
     hour: "2-digit",
@@ -83,44 +86,50 @@ export default function LeMur() {
   const [entries, setEntries] = useState([]);
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [submitting, setSubmitting] = useState(false);
-
+  const [toast, setToast] = useState(null); // { type: 'success' | 'error', text: string }
   const columns = useMemo(() => splitColumns(GROUP_PHOTOS, 3), []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await window.storage.get("lemur:messages", true);
-        const parsed = res ? JSON.parse(res.value) : [];
-        setEntries(Array.isArray(parsed) ? parsed : []);
-        setStatus("ready");
-      } catch {
-        setEntries([]);
-        setStatus("ready");
-      }
-    })();
-  }, []);
+(async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select()
+      .order('created_at', { ascending: false })
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!name.trim() || !message.trim()) return;
-    setSubmitting(true);
-    const newEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name: name.trim(),
-      message: message.trim(),
-      timestamp: Date.now(),
-    };
-    const next = [newEntry, ...entries];
-    try {
-      await window.storage.set("lemur:messages", JSON.stringify(next), true);
-      setEntries(next);
-      setMessage("");
-    } catch {
-      setStatus("error");
-    } finally {
-      setSubmitting(false);
+    if (error) {
+      console.error(error)
+      setStatus('error')
+      return
     }
+    setEntries(data)
+    setStatus('ready')
+  })()
+}, [])
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  if (!name.trim() || !message.trim()) return;
+  setSubmitting(true);
+
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({ name: name.trim(), message: message.trim() })
+    .select();
+
+  if (error) {
+    console.error(error);
+    setStatus('error');
+    setToast({ type: 'error', text: "Oups, ça n'a pas pu s'envoyer 😕" });
+  } else {
+    setEntries([data[0], ...entries]);
+    setMessage('');
+    setToast({ type: 'success', text: "C'est envoyé ! 🎉" });
   }
+  setSubmitting(false);
+
+  // Le toast disparaît tout seul après 3 secondes
+  setTimeout(() => setToast(null), 3000);
+}
 
   return (
     <div className="page">
@@ -362,6 +371,34 @@ export default function LeMur() {
           transform: translateY(2px);
           box-shadow: 0 2px 0 #41277e;
         }
+
+        .toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(41,31,61,0.25);
+  z-index: 50;
+  animation: toast-in 0.25s ease;
+}
+.toast-success { background: var(--mint); }
+.toast-error   { background: var(--coral); }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+}
+          
       `}</style>
 
       <div className="hero">
@@ -401,7 +438,8 @@ export default function LeMur() {
               required
             />
           </div>
-          <button className="submit-btn" type="submit" disabled={submitting}>
+          <button 
+          className="submit-btn" type="submit" disabled={submitting}>
             {submitting ? "Ça s'accroche…" : "Accrocher au mur"}
           </button>
         </form>
@@ -415,6 +453,11 @@ export default function LeMur() {
           Voir le ressenti de mes amis
         </button>
       </div>
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.text}
+        </div>      )}
+
     </div>
   );
 }
