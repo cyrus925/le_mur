@@ -95,11 +95,16 @@ export default function LeMurDesMots() {
 
         * { box-sizing: border-box; }
 
-.page {
-  min-height: 100vh; /* Utilise toute la hauteur de la fenêtre */
-  display: flex;
-  flex-direction: column;
-}
+        .page {
+          min-height: 100%;
+          background:
+            radial-gradient(circle at 15% 8%, rgba(255,107,87,0.10), transparent 40%),
+            radial-gradient(circle at 85% 5%, rgba(78,143,224,0.10), transparent 40%),
+            var(--paper);
+          font-family: 'Nunito', sans-serif;
+          color: var(--ink);
+          padding-bottom: 48px;
+        }
 
         .hero {
           text-align: center;
@@ -128,15 +133,14 @@ export default function LeMurDesMots() {
         }
 
         /* --- Grille de post-it --- */
-.notes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
-  padding: 24px 18px 0;
-  max-width: 900px;
-  margin: 0 auto;
-  flex: 1; /* Permet à la grille de s'étendre */
-}
+        .notes-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 20px;
+          padding: 24px 18px 0;
+          max-width: 900px;
+          margin: 0 auto;
+        }
 
         .note-card {
           background: #FFFDF8;
@@ -253,11 +257,11 @@ export default function LeMurDesMots() {
         </div>
       )}
 
-     <div style={{ textAlign: 'center', margin: '28px 0 0', flexShrink: 0 }}>
-  <button onClick={() => navigate('/')} className="home-button">
-    Retour au Mur
-  </button>
-</div>
+      <div style={{ textAlign: 'center', margin: '28px 0 0' }}>
+        <button onClick={() => navigate('/')} className="home-button">
+          Retour au Mur
+        </button>
+      </div>
     </div>
   );
 }
