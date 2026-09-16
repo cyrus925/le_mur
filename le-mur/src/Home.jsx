@@ -250,16 +250,29 @@ async function handleSubmit(e) {
           margin-bottom:5px;
           color:#6b6180;
         }
-        .field input, .field textarea{
-          width:100%;
-          border:2px solid #ECE4F5;
-          border-radius:12px;
-          padding:10px 12px;
-          font-family:'Nunito', sans-serif;
-          font-size:1rem;
-          background:#FDFBF7;
-          resize:vertical;
-        }
+        :root{
+  --paper:#FFF7EC;
+  --ink:#291F3D;
+  --coral:#FF6B57;
+  --sun:#FFC145;
+  --mint:#3ABE8E;
+  --sky:#4E8FE0;
+  --grape:#B168E8;
+  color-scheme: light; /* ← empêche Safari de forcer le mode sombre sur les champs */
+}
+
+.field input, .field textarea{
+  width:100%;
+  border:2px solid #ECE4F5;
+  border-radius:12px;
+  padding:10px 12px;
+  font-family:'Nunito', sans-serif;
+  font-size:1rem;
+  background:#FDFBF7;
+  resize:vertical;
+  color: var(--ink);              /* ← force explicitement le texte tapé */
+  -webkit-text-fill-color: var(--ink); /* ← nécessaire spécifiquement sur Safari/iOS */
+}
         .field input:focus, .field textarea:focus{
           outline:none;
           border-color:var(--sky);
@@ -325,7 +338,6 @@ async function handleSubmit(e) {
           border-radius:2px;
         }
         .note-text{
-          color:black;
           margin:4px 0 10px;
           font-size:1.02rem;
           line-height:1.45;
