@@ -325,6 +325,7 @@ async function handleSubmit(e) {
           border-radius:2px;
         }
         .note-text{
+          color:black;
           margin:4px 0 10px;
           font-size:1.02rem;
           line-height:1.45;
